@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Phishing Shield",
+  "version": "0.1.0",
+  "description": "Detects and blocks phishing websites in real time.",
+  "permissions": ["storage", "activeTab", "scripting", "webNavigation"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["heuristics.js", "content.js"],
+      "css": ["overlay.css"],
+      "run_at": "document_start"
+    }
+  ],
+  "action": {
+    "default_popup": "popup/popup.html"
+  }
+}

@@ -1,0 +1,24 @@
+#phishing-shield-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  background: rgba(20, 0, 0, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: system-ui, sans-serif;
+}
+.ps-box {
+  background: #fff;
+  color: #111;
+  max-width: 480px;
+  padding: 32px;
+  border-radius: 12px;
+  text-align: center;
+}
+.ps-box h1 { color: #c0152f; font-size: 20px; margin-bottom: 8px; }
+.ps-score { font-weight: 600; margin-bottom: 12px; }
+.ps-reasons { text-align: left; font-size: 14px; margin-bottom: 20px; }
+.ps-actions { display: flex; gap: 10px; justify-content: center; }
+#ps-leave { background: #c0152f; color: #fff; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; }
+#ps-proceed { background: #eee; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; }
