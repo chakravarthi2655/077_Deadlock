@@ -1,15 +1,18 @@
+import os
+import io
+from typing import Optional
+
 import uvicorn
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
-from typing import Optional
 import pytesseract
 from PIL import Image
-import io
-import pytesseract
 
-# Explicitly set the Tesseract executable path on Windows
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+# Set Tesseract binary path dynamically based on OS
+if os.name == 'nt':
+    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+# On Linux (cloud host), pytesseract automatically uses /usr/bin/tesseract
 
 app = FastAPI(title="PhishGuard Intelligence")
 
@@ -39,14 +42,12 @@ async def scan_sms(
 ):
     extracted_text = sms_text or ""
 
-    # If an image was uploaded, run OCR
     if image:
         image_bytes = await image.read()
         img = Image.open(io.BytesIO(image_bytes))
         ocr_result = pytesseract.image_to_string(img)
         extracted_text += f"\n[OCR Extracted Text]: {ocr_result.strip()}"
 
-    # Plug in your LLM/Smishing classification logic using `extracted_text`
     return {
         "risk_score": 92 if "http" in extracted_text.lower() or "urgent" in extracted_text.lower() else 30,
         "extracted_text": extracted_text.strip(),
@@ -183,34 +184,38 @@ HTML_LAYOUT = """
       document.getElementById('loading-state').classList.remove('hidden');
       document.getElementById('results-card').classList.add('hidden');
 
-      if (currentTab === 'domain') {
-        const value = document.getElementById('domain-input').value;
-        if (!value.trim()) return;
+      try {
+        if (currentTab === 'domain') {
+          const value = document.getElementById('domain-input').value;
+          if (!value.trim()) return;
 
-        const res = await fetch('/api/scan-domain', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ domain: value })
-        });
-        const data = await res.json();
-        renderResults(data);
-      } else {
-        const formData = new FormData();
-        const textVal = document.getElementById('sms-input').value;
-        const fileInput = document.getElementById('image-input');
+          const res = await fetch('/api/scan-domain', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ domain: value })
+          });
+          const data = await res.json();
+          renderResults(data);
+        } else {
+          const formData = new FormData();
+          const textVal = document.getElementById('sms-input').value;
+          const fileInput = document.getElementById('image-input');
 
-        if (textVal) formData.append('sms_text', textVal);
-        if (fileInput.files[0]) formData.append('image', fileInput.files[0]);
+          if (textVal) formData.append('sms_text', textVal);
+          if (fileInput.files[0]) formData.append('image', fileInput.files[0]);
 
-        const res = await fetch('/api/scan-sms', {
-          method: 'POST',
-          body: formData
-        });
-        const data = await res.json();
-        renderResults(data);
+          const res = await fetch('/api/scan-sms', {
+            method: 'POST',
+            body: formData
+          });
+          const data = await res.json();
+          renderResults(data);
+        }
+      } catch (err) {
+        console.error("Scan error:", err);
+      } finally {
+        document.getElementById('loading-state').classList.add('hidden');
       }
-
-      document.getElementById('loading-state').classList.add('hidden');
     }
 
     function renderResults(data) {
