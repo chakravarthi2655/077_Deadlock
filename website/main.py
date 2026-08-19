@@ -18,7 +18,7 @@ if os.name == 'nt':
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 # On Linux (cloud host): requires `apt-get install tesseract-ocr`
 
-VT_API_KEY = os.environ.get("VT_API_KEY")  # set this in your environment — never hardcode it
+  # set this in your environment — never hardcode it
 VT_BASE_URL = "https://www.virustotal.com/api/v3/domains"
 
 app = FastAPI(title="PhishGuard Intelligence")
